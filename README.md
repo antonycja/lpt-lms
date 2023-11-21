@@ -16,7 +16,7 @@ To get started with lpt-lms, follow these steps:
 Describe how users can interact with your system. Provide examples or usage scenarios.
 
 ## Contributing
-We welcome contributions from the community. To contribute to lpt-lms, please follow these guidelines [CONTRIBUTING.md] (link to your contribution guidelines).
+We welcome contributions from the community. To contribute to lpt-lms, please follow these guidelines CONTRIBUTING.md.
 
 
 ## License
