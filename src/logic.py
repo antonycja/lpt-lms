@@ -49,7 +49,7 @@ def user() -> tuple[str, str]:
 
     try:
         firefox_options = webdriver.FirefoxOptions()
-        # firefox_options.add_argument("--headless")
+        firefox_options.add_argument("--headless")
         browser = webdriver.Firefox(options=firefox_options)
     except InvalidArgumentException:
         print("Failed to connect to browser")
