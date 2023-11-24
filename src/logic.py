@@ -49,7 +49,7 @@ def user() -> tuple[str, str]:
 
     try:
         firefox_options = webdriver.FirefoxOptions()
-        firefox_options.add_argument("--headless")
+        # firefox_options.add_argument("--headless")
         browser = webdriver.Firefox(options=firefox_options)
     except InvalidArgumentException:
         print("Failed to connect to browser")
@@ -113,9 +113,9 @@ def username_search_bar() -> None:
 
     # slack_users = 'html body.p-ia4_body.gecko.use-slack-font div.p-client_container div.p-ia4_client_container div.p-ia4_client.p-ia4_client--with-search-in-top-nav.p-ia4_client--workspace-switcher-prototype-on.p-ia4_client--browser.p-ia4_client--theming div.p-client_workspace--including_tab_rail div.p-client_workspace div.p-client_workspace__layout div.active-managed-focus-container div div.p-view_contents.p-view_contents--primary.p-view_contents--channel-list-pry div div.p-view_header.p-view_header--tiles.p-view_header--with-bookmarks-bar div.p-view_header__actions div.p-autoclog__hook button.c-button-unstyled.p-avatar_stack--details'
 
-    slack_users_xpath = "/html/body/div[2]/div/div/div[4]/div[2]/div[1]/div[3]/div[2]/div/div/div[1]/div[2]/div[1]/button"
+    # slack_users_xpath = "/html/body/div[2]/div/div/div[4]/div[2]/div[1]/div[3]/div[2]/div/div/div[1]/div[2]/div[1]/button"
 
-    # slack_users_class = "stack--details"
+    slack_users_class = "p-avatar_stack--details"
 
     try:
         slack_page_element = WebDriverWait(browser, wait_period).until(
@@ -131,7 +131,7 @@ def username_search_bar() -> None:
     try:
         # print("Trying to find btn")
         slack_users_element = WebDriverWait(browser, wait_period).until(
-            EC.presence_of_element_located((By.XPATH, slack_users_xpath))
+            EC.presence_of_element_located((By.CLASS_NAME, slack_users_class))
         )
         # print("Arrived, about to click")
         slack_users_element.click()
