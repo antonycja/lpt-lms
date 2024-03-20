@@ -1,9 +1,12 @@
 import os
-from logic import run_script, delete_tmp_files, tmp_file_path, exit
+from logic import run_script, delete_tmp_files, tmp_file_path
 from config_setup import create_config, path
 import lpt_lms
 
+# TODO: Import the config
+
 config_path = f'{path}/.config/lpt/config.yml'
+# TODO: Tmp path
 
 
 def run_lms_script() -> None:
@@ -25,7 +28,6 @@ def run_lms_script() -> None:
 
     else:
         create_config()
-        lpt_lms.print_term_lines()
         if len(os.listdir(tmp_file_path)) == 0:
             message = lpt_lms.run()
         else:
@@ -34,11 +36,8 @@ def run_lms_script() -> None:
 
 
 if __name__ == "__main__":
-    try:
-        print()
-        run_lms_script()
-        lpt_lms.messenger(message)
-        exit()
-    except KeyboardInterrupt:
-        print()
-        exit()
+
+    print()
+    run_lms_script()
+    lpt_lms.messenger(message)
+    delete_tmp_files(os)

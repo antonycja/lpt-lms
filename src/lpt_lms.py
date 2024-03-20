@@ -1,7 +1,9 @@
 import subprocess
 import os
 from time import sleep
-from sys import exit
+# rewriting the parameter_generator.sh in python
+
+# technically we still using bash but I am scripting it as a .py file for better compatibility
 
 
 def print_term_lines():
@@ -10,38 +12,29 @@ def print_term_lines():
 
 
 def login_lms():
+    """
+    The start of the review process \n
+    Accepts the review and generates the sample file
+    """
+    # logging into lms
+    subprocess.run(f"wtc-lms login", shell=True)
+    print_term_lines()
+    print(f"\nloading available reviews...\n\n")
+    subprocess.run(f"wtc-lms reviews", shell=True)
 
-    try:
-        print_term_lines()
-        print("Logging into WTC-LMS")
-
-        try:
-            out = subprocess.run(f"wtc-lms login", shell=True,
-                                 stdout=subprocess.PIPE, text=True)
-        except KeyboardInterrupt:
-            exit()
-
-        if "login failed" in out.stdout:
-            print_term_lines()
-            print(out.stdout)
-            print("Error response: Incorrect Password")
-            exit()
-
-        # sleep(4)
-        print()
-        print_term_lines()
-        print(f"\nloading available reviews...\n\n")
-        subprocess.run(f"wtc-lms reviews", shell=True)
-    except KeyboardInterrupt:
-        exit()
+    return
 
 
 def get_UUID():
-    print("Please enter the UUID(s) you would like to review separated by spaces (spicey-chick-set spare-ton-fix)")
-    user_input = input("\n\nEnter the UUID(S): ").lower(
-    ).strip().strip("(").strip(")")
+    """
+    Gets user input
 
+    Returns:
+        list: Returns a list of the selected UUID(S)
+    """
 
+    # saving user input into a variable
+    user_input = input("\n\nEnter the UUID(S): ").lower().strip()
     ls_of_sel_UUID = user_input.split(" ")
     subprocess.run(f'echo', shell=True)
 
@@ -49,9 +42,15 @@ def get_UUID():
 
 
 def accept_reviews(student_UUIDS: list):
+    """
+    Accepting student reviews, cloning the relevant work and storing the student information
+
+    Args:
+        student_UUIDS (list): a list of the student uuid
+    """
     failed = []
     successful = []
-
+    # accepting reviews
     for uuid in student_UUIDS:
         print_term_lines()
         print(f"For {uuid}: ")
@@ -72,15 +71,11 @@ def accept_reviews(student_UUIDS: list):
         if ("fatal: You must specify a repository to clone.") in var.stderr:
             var = subprocess.run(
                 f'git clone $(cat "{uuid}.txt" | grep -w "Git Url:" | cut -f3 -d " ")', shell=True, capture_output=True, text=True)
-            sleep(5)
-            continue
 
         if "Failed" in var.stderr or "failed" in var.stderr:
             print(var.stderr.strip())
             failed.append(uuid)
             os.remove(f'{uuid}.txt')
-            sleep(5)
-            continue
         else:
             print(var.stderr)
             successful.append(uuid)
@@ -93,6 +88,7 @@ def accept_reviews(student_UUIDS: list):
 
 
 def failed(failed):
+
     print()
     print_term_lines()
     print("Failed to clone the following: ")
@@ -103,21 +99,28 @@ def failed(failed):
 
 
 def parameter_generation(student_UUID: list):
+    """
+    Generates the files that is needed for selenium's message automation
+
+    Args:
+        student_UUIDS (list): a list of the student uuid
+    """
+    # making the lpt folder
     try:
         os.mkdir("/tmp/lpt")
     except FileExistsError:
         pass
 
+    # we suppose to get the par from uuid.txt
     UUID_sample = []
     for uuid in student_UUID:
-        if ".sample-" in uuid:
-            continue
-        else:
-            UUID_sample.append((f"sample-{uuid}"))
+        UUID_sample.append((f"sample-{uuid}"))
 
+    # the index of the first
     uuid_index = 0
     for uuid in UUID_sample:
 
+        # we opening and writing to a file the file sample-name:
         with open(f".{uuid}.txt", "w") as f:
             subprocess.run(
                 f'(cat "{student_UUID[uuid_index]}.txt" | grep -w "Submission" | cut -f3 -d " ")', shell=True, stdout=f, text=True)
@@ -130,34 +133,22 @@ def parameter_generation(student_UUID: list):
             ID = subprocess.run(
                 f'(cat "{student_UUID[uuid_index]}.txt" | grep -w "add_comment" | cut -f3 -d " ")', shell=True, stdout=subprocess.PIPE, text=True)
             f.write(f"UUID: {ID.stdout}")
-
-            # Renaming the folder with student name
-            name = subprocess.run(
-                f'(cat "{student_UUID[uuid_index]}.txt" | grep -w "Submission" | cut -f3 -d " ")', shell=True, capture_output=True, text=True)
-            file_name = subprocess.run(
-                f'(cat "{student_UUID[uuid_index]}.txt" | grep -w "Git Url:" | cut -f2 -d "/")', shell=True, capture_output=True, text=True)
-
-            folder_name = file_name.stdout
-            new_name = folder_name.replace(".git", "").strip()
-            rename = name.stdout
-            rename = rename.strip("@student.wethinkcode.co.za\n")
-
-            sleep(1)
-            subprocess.run(f'mv {new_name} {rename}',
-                           shell=True, capture_output=True, text=True)
-            sleep(1)
-            subprocess.run(f'mv {student_UUID[uuid_index]} {rename}',
-                           shell=True, capture_output=True, text=True)
-
+        # once we done writing, we move on the next index
         uuid_index += 1
 
     message = reminder(UUID_sample)
-    subprocess.run(f"mv .sample* /tmp/lpt", shell=True, capture_output=True)
+    subprocess.run(f"mv .s* /tmp/lpt", shell=True, capture_output=True)
 
     return message
 
 
 def reminder(UUID_sample: list):
+    """
+    Generates a message for the user as a reminder to text the students
+    Args:
+        UUID_sample (list):
+    """
+
     reminder_info = []
     for uuid in UUID_sample:
         with open(f".{uuid}.txt", "r") as saved_files:
@@ -179,6 +170,9 @@ def reminder(UUID_sample: list):
 
 
 def messenger(message):
+    """
+    Reminds the user to follow up on the personals
+    """
 
     print()
     print_term_lines()
@@ -190,39 +184,29 @@ def messenger(message):
 
 
 def run():
-    try:
-        login_lms()
-        UUID_list = get_UUID()
-        fail, success = accept_reviews(UUID_list)
-        message = parameter_generation(success)
+    login_lms()
+    UUID_list = get_UUID()
+    fail, success = accept_reviews(UUID_list)
+    message = parameter_generation(success)
 
-        if len(fail) > 0:
-            failed(fail)
-        if len(success) > 0:
-            return message
-    except KeyboardInterrupt:
-        print()
-        exit()
+    if len(fail) > 0:
+        failed(fail)
+    if len(success) > 0:
+        return message
+
+    # exit()
 
 
 def return_message():
 
-    # subprocess.run(f"cd /tmp/lpt",shell=True)
-    os.chdir("/tmp/lpt")
+    file_in_dir = os.listdir(os.getcwd())
+    files = [file for file in file_in_dir
+             if ".txt" in file]
 
-    try:
-
-        file_in_dir = os.listdir(os.getcwd())
-
-        files = [file for file in file_in_dir
-                 if ".txt" in file]
-
-        UUID_list = []
-        for file in files:
-            txt_file_name = file.replace(".txt", "").replace(".s","s")
-            UUID_list.append(txt_file_name)
-        message = reminder(UUID_list)
-    except FileNotFoundError:
-        print("Your message box is clean.")
+    UUID_list = []
+    for file in files:
+        txt_file_name = file.split(".")[0]
+        UUID_list.append(txt_file_name)
+    message = parameter_generation(UUID_list)
 
     return message

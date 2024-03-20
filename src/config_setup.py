@@ -4,15 +4,20 @@ import os
 from getpass import getpass
 import subprocess
 
+""" Generate a fernet key"""
+
 path = os.environ.get('HOME')
+
 
 def genwrite_key(dir):
     key = Fernet.generate_key()
-    with open(f'{dir}/.pass.key', "wb") as key_file:
+    with open(f'{dir}/pass.key', "wb") as key_file:
         key_file.write(key)
 
+
 def call_key(dir):
-    return open(f'{dir}/.pass.key', 'rb').read()
+    return open(f'{dir}/pass.key', 'rb').read()
+
 
 def make_dir(path):
     try:
@@ -22,6 +27,7 @@ def make_dir(path):
         pass
 
     return config_path
+
 
 def create_config():
 
@@ -47,10 +53,14 @@ def create_config():
         'slack_password': f.encrypt(slack_password.encode())
     }
 
+    # * write to file
     with open(f'{path}/.config/lpt/config.yml', 'w') as config:
         data = yaml.dump(user_info, config)
 
     return data
+
+
+# read from the config file:
 
 def read_config():
     config_path = os.path.join(f"{path}/.config", 'lpt')
@@ -71,6 +81,7 @@ def read_config():
 
 def check_selenium_install():
     package_name = "selenium"
+
     try:
         import pip
     except ModuleNotFoundError:
